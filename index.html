@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Glowing Heart - Algerian Style</title>
+    <style>
+        body { background-color: #000; margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        
+        #text-container {
+            position: absolute;
+            width: 100%;
+            top: 10%;
+            text-align: center;
+        }
+        
+        #main-text {
+            color: #3399ff;
+            /* ALGERIAN FONT ADDED HERE */
+            font-family: 'Algerian', 'serif'; 
+            font-size: 55px; /* Slightly bigger to show off the font detail */
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px #0055ff, 0 0 40px #0022aa;
+            margin-bottom: 5px;
+        }
+
+        #sub-text {
+            color: #ffffff;
+            font-family: 'Courier New', monospace; /* Keep this simple for contrast */
+            font-size: 20px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #3399ff;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="text-container">
+        <div id="main-text">I Love You</div>
+        <div id="sub-text">Forever & Always</div>
+    </div>
+    <canvas id="heartCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        function Point(x, y) { this.x = x || 0; this.y = y || 0; }
+
+        function Particle() {
+            this.position = new Point();
+            this.velocity = new Point();
+            this.acceleration = new Point();
+        }
+
+        // DOUBLE SIZE MATH
+        function getHeartPoint(t) {
+            return new Point(
+                320 * Math.pow(Math.sin(t), 3),
+                260 * Math.cos(t) - 50 * Math.cos(2 * t) - 20 * Math.cos(3 * t) - 10 * Math.cos(4 * t)
+            );
+        }
+
+        Particle.prototype.initialize = function(x, y, dx, dy) {
+            this.position.x = x; this.position.y = y;
+            this.velocity.x = dx; this.velocity.y = dy;
+            this.acceleration.x = dx * -0.05;
+            this.acceleration.y = dy * -0.05;
+        };
+
+        Particle.prototype.update = function() {
+            this.position.x += this.velocity.x;
+            this.position.y += this.velocity.y;
+            this.velocity.x += this.acceleration.x;
+            this.velocity.y += this.acceleration.y;
+        };
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const pos = getHeartPoint(Math.random() * 2 * Math.PI);
+            const p = new Particle();
+            p.initialize(canvas.width / 2, canvas.height / 2 + 80, pos.x / 40, -pos.y / 40);
+            particles.push(p);
+            
+            if (particles.length > 750) particles.shift();
+
+            particles.forEach(p => {
+                p.update();
+                ctx.fillStyle = '#3399ff'; 
+                ctx.beginPath();
+                ctx.arc(p.position.x, p.position.y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
